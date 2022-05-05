@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import glob from "glob";
+import { fdir } from "fdir";
 
 import { getPopularities } from "../content/index.js";
 import { FLAW_LEVELS, options as buildOptions } from "../build/index.js";
@@ -211,9 +211,14 @@ export default (req, res) => {
     }
   }
 
-  for (const filePath of glob.sync(
-    path.join(BUILD_OUT_ROOT, locale, "**", "index.json")
-  )) {
+  const api = new fdir()
+    .withFullPaths()
+    .withErrors()
+    .filter((filePath) => {
+      return filePath.endsWith("index.json");
+    })
+    .crawl(path.join(BUILD_OUT_ROOT, locale));
+  for (const filePath of api.sync()) {
     const { doc } = JSON.parse(fs.readFileSync(filePath));
 
     // The home page, for example, also uses a `index.json` but it doesn't have

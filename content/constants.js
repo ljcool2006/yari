@@ -44,6 +44,9 @@ if (CONTENT_TRANSLATED_ROOT) {
   REPOSITORY_URLS[CONTENT_TRANSLATED_ROOT] = "mdn/translated-content";
 }
 
+const HTML_FILENAME = "index.html";
+const MARKDOWN_FILENAME = "index.md";
+
 function correctContentPathFromEnv(envVarName) {
   let pathName = process.env[envVarName];
   if (!pathName) {
@@ -74,4 +77,6 @@ export {
   VALID_LOCALES,
   ACTIVE_LOCALES,
   DEFAULT_LOCALE,
+  HTML_FILENAME,
+  MARKDOWN_FILENAME,
 };

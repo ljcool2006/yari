@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
 import { Doc, FrequentlyViewedEntry } from "./types";
 
 export function useDocumentURL() {
@@ -12,6 +12,8 @@ export function useDocumentURL() {
 }
 
 export function useCopyExamplesToClipboard(doc: Doc | undefined) {
+  const location = useLocation();
+
   useEffect(() => {
     if (!doc) {
       return;
@@ -78,7 +80,7 @@ export function useCopyExamplesToClipboard(doc: Doc | undefined) {
         };
       }
     );
-  }, [doc]);
+  }, [doc, location]);
 }
 
 function showCopiedMessage(wrapper: HTMLElement, msg: string) {
@@ -222,6 +224,67 @@ export function usePersistFrequentlyViewed(doc: Doc | undefined) {
 }
 
 /**
+ * Provides the height of the sticky header.
+ */
+export function useStickyHeaderHeight() {
+  function determineStickyHeaderHeight(): number {
+    if (typeof getComputedStyle !== "function") {
+      // SSR.
+      return 0;
+    }
+
+    const styles = getComputedStyle(document.documentElement);
+    const stickyHeaderHeight = styles
+      .getPropertyValue("--sticky-header-height")
+      .trim();
+
+    if (stickyHeaderHeight.endsWith("rem")) {
+      const fontSize = styles.fontSize.trim();
+      if (fontSize.endsWith("px")) {
+        return parseFloat(stickyHeaderHeight) * parseFloat(fontSize);
+      } else {
+        console.warn(
+          `[useStickyHeaderHeight] fontSize has unexpected unit: ${fontSize}`
+        );
+        return 0;
+      }
+    } else if (stickyHeaderHeight.endsWith("px")) {
+      return parseFloat(stickyHeaderHeight);
+    } else {
+      console.warn(
+        `[useStickyHeaderHeight] --sticky-header-height has unexpected unit: ${stickyHeaderHeight}`
+      );
+      return 0;
+    }
+  }
+
+  const [height, setHeight] = useState<number>(determineStickyHeaderHeight());
+
+  const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // Unfortunately we cannot observe the CSS variable using MutationObserver,
+    // but we know that it may change when the width of the window changes.
+
+    const debouncedListener = () => {
+      if (timeout.current) {
+        window.clearTimeout(timeout.current);
+      }
+      timeout.current = setTimeout(() => {
+        setHeight(determineStickyHeaderHeight());
+        timeout.current = null;
+      }, 250);
+    };
+
+    window.addEventListener("resize", debouncedListener);
+
+    return () => window.removeEventListener("resize", debouncedListener);
+  }, []);
+
+  return height;
+}
+
+/**
  * Observes elements and fires the callback when the first visible element changes.
  */
 export function useFirstVisibleElement(
@@ -235,7 +298,19 @@ export function useFirstVisibleElement(
     visibleElementCallback(firstVisibleElement);
   }, [visibleElementCallback, firstVisibleElement]);
 
+  const [rootMargin, setRootMargin] = useState<string>("0px");
+  const stickyHeaderHeight = useStickyHeaderHeight();
+
   useEffect(() => {
+    setRootMargin(`-${stickyHeaderHeight}px 0px 0px 0px`);
+  }, [stickyHeaderHeight]);
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") {
+      // SSR or old browser.
+      return;
+    }
+
     const observedElements = observedElementsProvider();
     const visibilityByElement = new Map<Element, boolean>();
 
@@ -259,6 +334,7 @@ export function useFirstVisibleElement(
         manageFirstVisibleElement();
       },
       {
+        rootMargin,
         threshold: [0.0, 1.0],
       }
     );
@@ -269,5 +345,5 @@ export function useFirstVisibleElement(
     });
 
     return () => observer.disconnect();
-  }, [observedElementsProvider, visibleElementCallback]);
+  }, [rootMargin, observedElementsProvider, visibleElementCallback]);
 }

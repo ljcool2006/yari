@@ -2,13 +2,13 @@ import fs from "fs";
 import crypto from "crypto";
 import path from "path";
 
-import glob from "glob";
 // @TODO we can probably remove the line below once CRA 5.0 is released
 // https://github.com/facebook/create-react-app/pull/11375
 // eslint-disable-next-line node/no-missing-import
 import chalk from "chalk";
 import fm from "front-matter";
 import log from "loglevel";
+import  { fdir } from "fdir";
 
 import {
   buildURL,
@@ -18,6 +18,8 @@ import {
   Redirect,
   CONTENT_ROOT,
   CONTENT_TRANSLATED_ROOT,
+  HTML_FILENAME,
+  MARKDOWN_FILENAME,
   VALID_LOCALES,
 } from "../content/index.js";
 
@@ -31,9 +33,16 @@ function syncAllTranslatedContent(locale) {
     );
   }
   const redirects = new Map();
-  const files = glob.sync(
-    path.join(CONTENT_TRANSLATED_ROOT, locale, "**", "index.{html,md}")
-  );
+  const api = new fdir()
+    .withFullPaths()
+    .withErrors()
+    .filter((filePath) => {
+      return (
+        filePath.endsWith(HTML_FILENAME) || filePath.endsWith(MARKDOWN_FILENAME)
+      );
+    })
+    .crawl(path.join(CONTENT_TRANSLATED_ROOT, locale));
+  const files = [...api.sync()];
   const stats = {
     movedDocs: 0,
     conflictingDocs: 0,

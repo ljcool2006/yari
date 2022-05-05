@@ -5,6 +5,8 @@ import {
   REPOSITORY_URLS,
   ROOTS,
   VALID_LOCALES,
+  HTML_FILENAME,
+  MARKDOWN_FILENAME,
 } from "./constants.js";
 import * as Document from "./document.js";
 import * as Translation from "./translation.js";
@@ -22,6 +24,9 @@ export {
   REPOSITORY_URLS,
   ROOTS,
   VALID_LOCALES,
+  HTML_FILENAME,
+  MARKDOWN_FILENAME,
+
   getPopularities,
   Document,
   Redirect,

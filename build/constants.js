@@ -50,7 +50,6 @@ const GOOGLE_ANALYTICS_ACCOUNT =
 const GOOGLE_ANALYTICS_DEBUG = JSON.parse(
   process.env.BUILD_GOOGLE_ANALYTICS_DEBUG || "false"
 );
-
 const NO_PROGRESSBAR = Boolean(
   JSON.parse(process.env.BUILD_NO_PROGRESSBAR || process.env.CI || "false")
 );

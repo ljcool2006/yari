@@ -3,7 +3,6 @@ import path from "path";
 import util from "util";
 
 import fm from "front-matter";
-import glob from "glob";
 import yaml from "js-yaml";
 import { fdir } from "fdir";
 
@@ -13,6 +12,8 @@ import {
   ACTIVE_LOCALES,
   VALID_LOCALES,
   ROOTS,
+  HTML_FILENAME,
+  MARKDOWN_FILENAME,
 } from "./constants.js";
 import { getPopularities } from "./popularities.js";
 import { getWikiHistories } from "./wikihistories.js";
@@ -34,9 +35,7 @@ function buildPath(localeFolder, slug) {
   return path.join(localeFolder, slugToFolder(slug));
 }
 
-const HTML_FILENAME = "index.html";
 const getHTMLPath = (folder) => path.join(folder, HTML_FILENAME);
-const MARKDOWN_FILENAME = "index.md";
 const getMarkdownPath = (folder) => path.join(folder, MARKDOWN_FILENAME);
 
 function updateWikiHistory(localeContentRoot, oldSlug, newSlug = null) {
@@ -502,15 +501,18 @@ function findChildren(url, recursive = false) {
   const locale = url.split("/")[1];
   const root = getRoot(locale);
   const folder = urlToFolderPath(url);
-  const globber = recursive ? ["*", "**"] : ["*"];
-  const childPaths = glob.sync(
-    path.join(
-      root,
-      folder,
-      ...globber,
-      `+(${HTML_FILENAME}|${MARKDOWN_FILENAME})`
-    )
-  );
+
+  const api = new fdir()
+    .withFullPaths()
+    .withErrors()
+    .filter((filePath) => {
+      return (
+        filePath.endsWith(HTML_FILENAME) || filePath.endsWith(MARKDOWN_FILENAME)
+      );
+    })
+    .withMaxDepth(recursive ? Infinity : 1)
+    .crawl(path.join(root, folder));
+  const childPaths = [...api.sync()];
   return childPaths
     .map((childFilePath) => path.relative(root, path.dirname(childFilePath)))
     .map((folder) => read(folder));
