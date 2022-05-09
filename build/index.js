@@ -323,7 +323,7 @@ async function buildDocument(document, documentOptions = {}) {
   const liveSamples = [];
 
   if (options.clearKumascriptRenderCache) {
-    renderKumascriptCache.reset();
+    renderKumascriptCache.clear();
   }
   try {
     [renderedHtml, flaws] = await renderFromURL(document.url);

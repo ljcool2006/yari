@@ -26,7 +26,6 @@ export {
   VALID_LOCALES,
   HTML_FILENAME,
   MARKDOWN_FILENAME,
-
   getPopularities,
   Document,
   Redirect,

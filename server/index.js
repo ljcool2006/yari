@@ -29,8 +29,13 @@ const { renderHTML } = require("../ssr/dist/main.cjs");
 
 import { CSP_VALUE, DEFAULT_LOCALE } from "../libs/constants/index.js";
 
-import { STATIC_ROOT, PROXY_HOSTNAME, FAKE_V1_API, CONTENT_HOSTNAME,
-  OFFLINE_CONTENT, } from "./constants.js";
+import {
+  STATIC_ROOT,
+  PROXY_HOSTNAME,
+  FAKE_V1_API,
+  CONTENT_HOSTNAME,
+  OFFLINE_CONTENT,
+} from "./constants.js";
 import documentRouter from "./document.js";
 import documentTraitsRouter from "./traits.js";
 import { router as fakeV1APIRouter } from "./fake-v1-api.js";

@@ -8,7 +8,7 @@ import path from "path";
 import chalk from "chalk";
 import fm from "front-matter";
 import log from "loglevel";
-import  { fdir } from "fdir";
+import { fdir } from "fdir";
 
 import {
   buildURL,
