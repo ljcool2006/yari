@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+// eslint-disable-next-line node/no-missing-import
 import got from "got";
 
 const DEV_BASE_URL =
@@ -201,8 +202,11 @@ test.describe("Testing the CRUD apps", () => {
 
     await page.goto(devURL("/"));
     expect(await page.title()).toContain("MDN Web Docs");
+    await page.waitForLoadState("networkidle");
+
     expect(await page.isVisible("text=Writer's home page")).toBeTruthy();
     expect(await page.isVisible('a:has-text("Flaws Dashboard")')).toBeTruthy();
+    expect(await page.isVisible('a:has-text("Sitemap")')).toBeTruthy();
   });
 
   test("open the Flaws Dashboard", async ({ page }) => {
@@ -220,9 +224,14 @@ test.describe("Testing the CRUD apps", () => {
     test.skip(withCrud());
 
     await page.goto(devURL("/"));
+    await page.waitForLoadState("networkidle");
+
     expect(await page.isVisible("text=Writer's home page")).toBeTruthy();
     await page.click('a:has-text("Sitemap")');
     await page.waitForLoadState("networkidle");
+
+    await page.locator('#sitemap:has-text("root")').waitFor();
+
     expect(await page.isVisible('a:has-text("/Web")')).toBeTruthy();
     expect(await page.isVisible('a:has-text("/Learn")')).toBeTruthy();
     await page.click('a:has-text("/Glossary")');

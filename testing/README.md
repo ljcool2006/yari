@@ -108,7 +108,6 @@ yarn dev
 And in another terminal, run:
 
 ```sh
-export TESTING_DEVELOPING=true
 yarn test:developing
 ```
 
@@ -130,9 +129,7 @@ Now, to run the tests in another terminal:
 
 ```sh
 cd /back/to/mdn/yari
-export TESTING_DEVELOPING=true
-export DEVELOPING_SKIP_DEV_URL=true
-yarn test:developing
+DEVELOPING_SKIP_DEV_URL=true yarn test:developing
 ```
 
 **Note!** It's admittedly many permutations of testing and it's hard to remember
